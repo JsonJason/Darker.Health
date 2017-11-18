@@ -2,6 +2,11 @@
 
 namespace Darker.Health
 {
+    /// <summary>
+    ///     A Meter value from 0 -> Maximum.
+    ///     Can be increased and Decreased, Can be depleted
+    ///     Health etc
+    /// </summary>
     public class Meter
     {
         private int _maximum;
@@ -41,13 +46,6 @@ namespace Darker.Health
             }
         }
 
-        public event EventHandler Depleted;
-
-        protected virtual void OnDepleted()
-        {
-            Depleted?.Invoke(this, EventArgs.Empty);
-        }
-
         public int Decrease(int amount)
         {
             if (amount < 0)
@@ -71,14 +69,42 @@ namespace Darker.Health
 
             var afterIncrease = Value + amount;
 
-            if (afterIncrease > Maximum)
+            if (afterIncrease >= Maximum)
             {
                 Value = Maximum;
+                OnRefilled();
                 return afterIncrease - Maximum;
             }
-
             Value += amount;
             return 0;
+        }
+
+        public int Refill()
+        {
+            var required = Maximum - Value;
+            Increase(required);
+            return required;
+        }
+
+        public int Deplete()
+        {
+            var amountToDeplete = Value;
+            Decrease(amountToDeplete);
+            return amountToDeplete;
+        }
+
+        public event EventHandler Refilled;
+
+        protected virtual void OnRefilled()
+        {
+            Refilled?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler Depleted;
+
+        protected virtual void OnDepleted()
+        {
+            Depleted?.Invoke(this, EventArgs.Empty);
         }
     }
 }

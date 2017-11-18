@@ -15,6 +15,18 @@ namespace Darker.Health.Tests
         private Meter _health;
         public int MaximumHealth = 100;
 
+        public void Refill_Fires_Refilled_Event()
+        {
+            var timesRefilledFired = 0;
+            _health.Maximum = 50;
+            _health.Value = 10;
+            _health.Refilled += (o, a) => timesRefilledFired++;
+
+            _health.Refill();
+
+            Assert.AreEqual(1, timesRefilledFired);
+        }
+
         [Test]
         public void Decrease_Lowers_Meter_Value()
         {
@@ -45,10 +57,41 @@ namespace Darker.Health.Tests
         }
 
         [Test]
+        public void Decrease_To_Zero_Depletes_Meter()
+        {
+            var timesDepletedFired = 0;
+            _health.Value = 10;
+            _health.Depleted += (o, a) => timesDepletedFired++;
+            _health.Decrease(10);
+
+            Assert.AreEqual(1, timesDepletedFired);
+        }
+
+        [Test]
         public void Decrease_Value_Cannot_Be_Negative()
         {
             _health.Value = 50;
             Assert.Throws<ArgumentOutOfRangeException>(() => _health.Decrease(-6));
+        }
+
+        [Test]
+        public void Deplete_Fires_Deplete_Event()
+        {
+            var timesDepletedFired = 0;
+            _health.Value = 10;
+            _health.Depleted += (o, a) => timesDepletedFired++;
+            _health.Deplete();
+
+            Assert.AreEqual(1, timesDepletedFired);
+        }
+
+        [Test]
+        public void Deplete_Returns_Amount_Depleted()
+        {
+            _health.Value = 38;
+            var depleted = _health.Deplete();
+
+            Assert.AreEqual(38, depleted);
         }
 
         [Test]
@@ -98,6 +141,19 @@ namespace Darker.Health.Tests
         }
 
         [Test]
+        public void Increasing_To_Full_Refills()
+        {
+            var timesRefilledFired = 0;
+            _health.Maximum = 50;
+            _health.Value = 10;
+            _health.Refilled += (o, a) => timesRefilledFired++;
+
+            _health.Increase(40);
+
+            Assert.AreEqual(1, timesRefilledFired);
+        }
+
+        [Test]
         public void Maximum_Value_Must_Be_Greater_Than_Zero()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => _health.Maximum = -5);
@@ -131,6 +187,28 @@ namespace Darker.Health.Tests
         public void Meter_Value_Starts_At_Maximum()
         {
             Assert.AreEqual(MaximumHealth, _health.Value);
+        }
+
+        [Test]
+        public void Refill_Meter_Sets_Value_To_Maximum()
+        {
+            _health.Maximum = 50;
+            _health.Value = 10;
+
+            _health.Refill();
+
+            Assert.AreEqual(_health.Maximum, _health.Value);
+        }
+
+        [Test]
+        public void Refill_Returns_Amount_Required_To_Refill()
+        {
+            _health.Maximum = 50;
+            _health.Value = 10;
+
+            var amountUsedToRefill = _health.Refill();
+
+            Assert.AreEqual(40, amountUsedToRefill);
         }
     }
 }
