@@ -15,6 +15,7 @@ namespace Darker.Health.Tests
         private Meter _health;
         public int MaximumHealth = 100;
 
+        [Test]
         public void Refill_Fires_Refilled_Event()
         {
             var timesRefilledFired = 0;
@@ -210,5 +211,55 @@ namespace Darker.Health.Tests
 
             Assert.AreEqual(40, amountUsedToRefill);
         }
+
+        [TestCaseSource(nameof(percentageCases))]
+        public void FillToPercent_Sets_Value(int maximum, int desiredpercent, int expectedvalue)
+        {
+            _health.Maximum = maximum;
+           
+
+            _health.FillToPercent(desiredpercent);
+
+            Assert.AreEqual(expectedvalue,_health.Value);
+            Assert.AreEqual(desiredpercent, _health.PercentageFilled);
+        }
+
+
+        private static object[] percentageCases =
+        {
+            new object[] {200, 1, 2},
+            new object[] { 50, 50, 25}
+        };
+
+        [TestCaseSource(nameof(percentageRemainderCases))]
+        public void FillToPercent_Returns_Value_Change(int max,int value,int desiredPercent,int amountChanged)
+        {
+            _health.Maximum = max;
+            _health.Value = value;
+
+            var changed = _health.FillToPercent(desiredPercent);
+
+            Assert.AreEqual(amountChanged,changed);
+        }
+
+        private static object[] percentageRemainderCases =
+        {
+            new object[] {100,10,50,40},
+            new object[] {100, 95,50,-45}
+        };
+
+        [Test]
+        public void FillToPercent_Cannot_Fill_Negative_Percentage()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => _health.FillToPercent(-56));
+        }
+
+        [Test]
+        public void FillToPercent_Cannot_Fill_Past_100()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => _health.FillToPercent(106));
+        }
+
+
     }
 }

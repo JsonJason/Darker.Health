@@ -46,6 +46,8 @@ namespace Darker.Health
             }
         }
 
+        public float PercentageFilled => (float)Value / Maximum * 100;
+
         public int Decrease(int amount)
         {
             if (amount < 0)
@@ -105,6 +107,24 @@ namespace Darker.Health
         protected virtual void OnDepleted()
         {
             Depleted?.Invoke(this, EventArgs.Empty);
+        }
+
+        public int FillToPercent(float percent)
+        {
+            if(percent < 0) throw new ArgumentOutOfRangeException(nameof(percent), $"Percent to fill to must be a positive number, cannot fill to {percent}%");
+            if(percent > 100) throw new ArgumentOutOfRangeException(nameof(percent), $"Cannot fill Meter over 100%. Cannot fill to {percent}% ");
+            var desiredValue = (int)((float)Maximum / 100 * percent);
+
+            if (desiredValue > Value)
+            {
+                var increase = desiredValue - Value;
+                Increase(increase);
+                return increase;
+            }
+
+            var decrease = Value - desiredValue;
+            Decrease(decrease);
+            return -decrease;
         }
     }
 }
