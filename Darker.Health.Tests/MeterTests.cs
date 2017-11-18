@@ -260,6 +260,28 @@ namespace Darker.Health.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => _health.FillToPercent(106));
         }
 
+        [Test]
+        public void SetMaximumToPercent_Cannot_Set_To_Negative_Percent()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => _health.SetMaximumToPercent(-56));
+        }
+
+        [TestCaseSource(nameof(maximumPercentCases))]
+        public void SetMaximumPercent_ChangesMaximum(int max,int desiredPercentage,int maxAfter)
+        {
+            _health.Maximum = max;
+            _health.SetMaximumToPercent(desiredPercentage);
+
+            Assert.AreEqual(maxAfter,_health.Maximum);
+        }
+
+
+        private static object[] maximumPercentCases =
+        {
+            new object[] {100,110,110},
+            new object[] {100, 20,20},
+            new object[] {50, 200,100}
+        };
 
     }
 }

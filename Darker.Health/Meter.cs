@@ -126,5 +126,13 @@ namespace Darker.Health
             Decrease(decrease);
             return -decrease;
         }
+
+        public void SetMaximumToPercent(int percent)
+        {
+            if (percent < 0) throw new ArgumentOutOfRangeException(nameof(percent), $"Cannot set maximum to negative percent, cannot set to {percent}%");
+
+            var desiredValue = (int)((float)Maximum / 100 * percent);
+            Maximum = desiredValue;
+        }
     }
 }
