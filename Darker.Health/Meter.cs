@@ -45,5 +45,18 @@ namespace Darker.Health
         {
             Depleted?.Invoke(this, EventArgs.Empty);
         }
+
+        public int Decrease(int amount)
+        {
+            if (amount > Value)
+            {
+                var remainder = amount - Value;
+                Value = 0;
+                return remainder;
+            }
+            else
+                Value -= amount;
+            return 0;
+        }
     }
 }
